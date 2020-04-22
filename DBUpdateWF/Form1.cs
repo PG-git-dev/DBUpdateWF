@@ -29,12 +29,6 @@ namespace DBUpdateWF
             InitializeComponent();
             gridControl1.Visible = false;
             gridControl2.Visible = false;
-            excelDataTable.Columns.Add("numberrrr");
-            excelDataTable.Columns.Add("code");
-            excelDataTable.Columns.Add("name");
-            excelDataTable.Columns.Add("cost");
-            excelDataTable.Columns["cost"].DataType = System.Type.GetType("System.Double");
-            excelDataTable.Columns.Add("action");
 
             //buttonDBUpdate.IsEnabled = false;
             //buttonCancel.IsEnabled = false;
@@ -81,10 +75,44 @@ namespace DBUpdateWF
                 try
                 {
                     var range = worksheet.Range[$"A1:E{excelRowCounter}"].CurrentRegion;
+                    excelDataTable = worksheet.CreateDataTable(range, true);
+                    if (excelDataTable.Columns.Count == 5)
+                    {
+                        if (!excelDataTable.Columns[0].ColumnName.Equals("№ п.п.") ||
+                        !excelDataTable.Columns[1].ColumnName.Equals("Код мед.изделия") ||
+                        !excelDataTable.Columns[2].ColumnName.Equals("Наименование") ||
+                        !excelDataTable.Columns[3].ColumnName.StartsWith("Цена за мед. изделие") ||
+                        !excelDataTable.Columns[4].ColumnName.Equals("Действие"))//
+                        {
+                            throw new Exception("Структура файла отличается от ожидаемой");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Структура файла отличается от ожидаемой");
+                    }
+                    excelDataTable.Columns[3].DataType = System.Type.GetType("System.Double");
                     DataTableExporter exporter = worksheet.CreateDataTableExporter(range, excelDataTable, true);
                     exporter.Options.ConvertEmptyCells = true;
                     exporter.Export();
-                    #region Connection to DB
+/*                    try
+                    {
+                        excelDataTable.PrimaryKey = new DataColumn[] { excelDataTable.Columns[1] };
+                    }
+                    catch
+                    {
+
+                        throw new Exception("Коды в файле не уникальны");
+                    }
+*/ //для обесспечения уникальноти кодов в экселе
+                    excelDataTable.Columns[0].ColumnName = "numberrrr";
+                    excelDataTable.Columns[1].ColumnName = "code";
+                    excelDataTable.Columns[2].ColumnName = "name";
+                    excelDataTable.Columns[3].ColumnName = "cost";
+                    excelDataTable.Columns["cost"].DataType = System.Type.GetType("System.Double");
+
+                    excelDataTable.Columns[4].ColumnName = "action";
+                    #region Connection settings checking
                     if (ini.KeyExists("Source", "DB_Connection") && ini.KeyExists("Catalog", "DB_Connection"))
                     {
                         connSource = ini.ReadINI("DB_Connection", "Source");
@@ -135,6 +163,10 @@ namespace DBUpdateWF
                                                         totalChangeCounter++;
                                                         changeCost = !changeCost;
                                                     }
+                                                    //else
+                                                    //{
+                                                    //    oldPrice = newPrice = dbRow["cost"];
+                                                    //}
                                                     if (!dbRow["name"].Equals(newDataRow["name"]))
                                                     {
                                                         oldName = dbRow["name"];
@@ -262,7 +294,7 @@ namespace DBUpdateWF
                         }
                         catch (SqlException sqlEx)
                         {
-                            MessageBox.Show($"Проверьте,gj;fkeqcnf? параметры подключения к базе данных {sqlEx.Message}");
+                            MessageBox.Show($"Проверьте параметры подключения к базе данных {sqlEx.Message}");
                             medStufButton.Enabled = true;
                         }
                     }
@@ -271,15 +303,18 @@ namespace DBUpdateWF
                         MessageBox.Show("Проверьте наличие файла конфигурации подключкния к БД", "Ошибка подключения к БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         medStufButton.Enabled = true;
                     }
-                    #endregion
-
+                #endregion
                 }
-                catch (InvalidOperationException ex)
+                catch (InvalidOperationException inOpEx)
                 {
-                    MessageBox.Show($"Ошибка структуры файла {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($@"Ошибка структуры файла.
+{inOpEx.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     medStufButton.Enabled = true;
                 }
-
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }//else от наличия файла в openFileDialogе
 
         }//medStufButton
@@ -293,8 +328,52 @@ namespace DBUpdateWF
 
         private void updateButton_Click(object sender, EventArgs e)
         {
-            medStufButton.Enabled = true;
+            if (ini.KeyExists("Source", "DB_Connection") && ini.KeyExists("Catalog", "DB_Connection"))
+            {
+                connSource = ini.ReadINI("DB_Connection", "Source");
+                connCatalog = ini.ReadINI("DB_Connection", "Catalog");
+                string connStr = $"Data Source={connSource};Initial Catalog={connCatalog};Integrated Security=True";
+                using (SqlConnection connection = new SqlConnection(connStr))
+                {
+                    connection.Open();
+                    SqlTransaction transaction = connection.BeginTransaction();
 
+                    SqlCommand command = connection.CreateCommand();
+                    command.Transaction = transaction;
+
+                    try
+                    {
+                        // выполняем две отдельные команды
+                        command.CommandText = "UpdateMedStuf";
+                        command.ExecuteNonQuery();
+                        command.CommandText = "DELETE dbo.med_stuf_temp";
+                        command.ExecuteNonQuery();
+
+                        // подтверждаем транзакцию
+                        transaction.Commit();
+                        MessageBox.Show("Данные обновлены");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($@"Приобновлении БД возникла ошибка
+{ex.Message}");
+                        transaction.Rollback();
+                        command.CommandText = "DELETE dbo.med_stuf_temp";
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Проверьте наличие файла конфигурации подключкния к БД", "Ошибка подключения к БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                medStufButton.Enabled = true;
+            }
+
+
+
+            medStufButton.Enabled = true;
+            updateButton.Enabled = false;
+            gridControl2.Visible = false;
         }
     }
 }
