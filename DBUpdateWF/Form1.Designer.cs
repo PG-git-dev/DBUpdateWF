@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            DevExpress.DataAccess.Sql.CustomSqlQuery customSqlQuery1 = new DevExpress.DataAccess.Sql.CustomSqlQuery();
+            DevExpress.DataAccess.Sql.CustomSqlQuery customSqlQuery2 = new DevExpress.DataAccess.Sql.CustomSqlQuery();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.gridControl1 = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
@@ -52,6 +52,7 @@
             this.colaccept = new DevExpress.XtraGrid.Columns.GridColumn();
             this.med_stuf_tempTableAdapter = new DBUpdateWF.STD_DB_DICT_HIVEDataSet1TableAdapters.med_stuf_tempTableAdapter();
             this.updateButton = new System.Windows.Forms.Button();
+            this.cansButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl2)).BeginInit();
@@ -79,10 +80,10 @@
             // 
             this.sqlDataSource1.ConnectionName = "desktop-n6r6keu\\sqlexpress.STD_DB_DICT_HIVE.dbo";
             this.sqlDataSource1.Name = "sqlDataSource1";
-            customSqlQuery1.Name = "Query";
-            customSqlQuery1.Sql = null;
+            customSqlQuery2.Name = "Query";
+            customSqlQuery2.Sql = null;
             this.sqlDataSource1.Queries.AddRange(new DevExpress.DataAccess.Sql.SqlQuery[] {
-            customSqlQuery1});
+            customSqlQuery2});
             this.sqlDataSource1.ResultSchemaSerializable = resources.GetString("sqlDataSource1.ResultSchemaSerializable");
             // 
             // medStufButton
@@ -97,11 +98,14 @@
             // 
             // gridControl2
             // 
+            this.gridControl2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.gridControl2.DataSource = this.medstuftempBindingSource;
-            this.gridControl2.Location = new System.Drawing.Point(31, 141);
+            this.gridControl2.Location = new System.Drawing.Point(12, 82);
             this.gridControl2.MainView = this.gridView2;
             this.gridControl2.Name = "gridControl2";
-            this.gridControl2.Size = new System.Drawing.Size(400, 200);
+            this.gridControl2.Size = new System.Drawing.Size(776, 356);
             this.gridControl2.TabIndex = 2;
             this.gridControl2.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView2});
@@ -137,6 +141,7 @@
             // 
             this.colid.FieldName = "id";
             this.colid.Name = "colid";
+            this.colid.OptionsColumn.AllowEdit = false;
             this.colid.Visible = true;
             this.colid.VisibleIndex = 0;
             this.colid.Width = 34;
@@ -145,6 +150,7 @@
             // 
             this.colcode.FieldName = "code";
             this.colcode.Name = "colcode";
+            this.colcode.OptionsColumn.AllowEdit = false;
             this.colcode.Visible = true;
             this.colcode.VisibleIndex = 1;
             this.colcode.Width = 34;
@@ -153,6 +159,7 @@
             // 
             this.colold_cost.FieldName = "old_cost";
             this.colold_cost.Name = "colold_cost";
+            this.colold_cost.OptionsColumn.AllowEdit = false;
             this.colold_cost.Visible = true;
             this.colold_cost.VisibleIndex = 2;
             this.colold_cost.Width = 34;
@@ -161,6 +168,7 @@
             // 
             this.colnew_cost.FieldName = "new_cost";
             this.colnew_cost.Name = "colnew_cost";
+            this.colnew_cost.OptionsColumn.AllowEdit = false;
             this.colnew_cost.Visible = true;
             this.colnew_cost.VisibleIndex = 3;
             this.colnew_cost.Width = 34;
@@ -169,6 +177,7 @@
             // 
             this.colold_name.FieldName = "old_name";
             this.colold_name.Name = "colold_name";
+            this.colold_name.OptionsColumn.AllowEdit = false;
             this.colold_name.Visible = true;
             this.colold_name.VisibleIndex = 4;
             this.colold_name.Width = 34;
@@ -177,6 +186,7 @@
             // 
             this.colnew_name.FieldName = "new_name";
             this.colnew_name.Name = "colnew_name";
+            this.colnew_name.OptionsColumn.AllowEdit = false;
             this.colnew_name.Visible = true;
             this.colnew_name.VisibleIndex = 5;
             this.colnew_name.Width = 34;
@@ -185,6 +195,7 @@
             // 
             this.colfile_n.FieldName = "file_n";
             this.colfile_n.Name = "colfile_n";
+            this.colfile_n.OptionsColumn.AllowEdit = false;
             this.colfile_n.Visible = true;
             this.colfile_n.VisibleIndex = 6;
             this.colfile_n.Width = 34;
@@ -193,6 +204,7 @@
             // 
             this.coleditor.FieldName = "editor";
             this.coleditor.Name = "coleditor";
+            this.coleditor.OptionsColumn.AllowEdit = false;
             this.coleditor.Visible = true;
             this.coleditor.VisibleIndex = 7;
             this.coleditor.Width = 20;
@@ -201,6 +213,7 @@
             // 
             this.coledit_date.FieldName = "edit_date";
             this.coledit_date.Name = "coledit_date";
+            this.coledit_date.OptionsColumn.AllowEdit = false;
             this.coledit_date.Visible = true;
             this.coledit_date.VisibleIndex = 8;
             this.coledit_date.Width = 67;
@@ -209,6 +222,7 @@
             // 
             this.colchng_knd.FieldName = "chng_knd";
             this.colchng_knd.Name = "colchng_knd";
+            this.colchng_knd.OptionsColumn.AllowEdit = false;
             this.colchng_knd.Visible = true;
             this.colchng_knd.VisibleIndex = 9;
             this.colchng_knd.Width = 32;
@@ -227,7 +241,8 @@
             // 
             // updateButton
             // 
-            this.updateButton.Location = new System.Drawing.Point(657, 14);
+            this.updateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.updateButton.Location = new System.Drawing.Point(657, 15);
             this.updateButton.Name = "updateButton";
             this.updateButton.Size = new System.Drawing.Size(131, 23);
             this.updateButton.TabIndex = 3;
@@ -235,18 +250,29 @@
             this.updateButton.UseVisualStyleBackColor = true;
             this.updateButton.Click += new System.EventHandler(this.updateButton_Click);
             // 
+            // cansButton
+            // 
+            this.cansButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cansButton.Location = new System.Drawing.Point(657, 53);
+            this.cansButton.Name = "cansButton";
+            this.cansButton.Size = new System.Drawing.Size(131, 23);
+            this.cansButton.TabIndex = 4;
+            this.cansButton.Text = "Отмена";
+            this.cansButton.UseVisualStyleBackColor = true;
+            this.cansButton.Click += new System.EventHandler(this.cansButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.cansButton);
             this.Controls.Add(this.updateButton);
             this.Controls.Add(this.gridControl2);
             this.Controls.Add(this.medStufButton);
             this.Controls.Add(this.gridControl1);
             this.Name = "Form1";
-            this.Text = "Form1";
-//            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Text = "Обновление БД";
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl2)).EndInit();
@@ -280,6 +306,7 @@
         private DevExpress.XtraGrid.Columns.GridColumn colchng_knd;
         private DevExpress.XtraGrid.Columns.GridColumn colaccept;
         private System.Windows.Forms.Button updateButton;
+        private System.Windows.Forms.Button cansButton;
     }
 }
 

@@ -34,6 +34,7 @@ namespace DBUpdateWF
             gridView2.CellValueChanging += GridView2_CellValueChanging;
 
             updateButton.Enabled = false;
+            cansButton.Enabled = false;
             //buttonDBUpdate.IsEnabled = false;
             //buttonCancel.IsEnabled = false;
 
@@ -81,7 +82,7 @@ namespace DBUpdateWF
             }
             else
             {
-                MessageBox.Show("Проверьте наличие файла конфигурации подключкния к БД", "Ошибка подключения к БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Проверьте наличие файла конфигурации подключения к БД", "Ошибка подключения к БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 medStufButton.Enabled = true;
             }
         }
@@ -98,6 +99,7 @@ namespace DBUpdateWF
             int changeNameCounter = 0;
             int totalChangeCounter = 0;
             int newCodeCounter = 0;
+            int delCodeCounter = 0;
             int excelRowCounter;
             bool changeCost = false;
 
@@ -177,6 +179,7 @@ namespace DBUpdateWF
                             string connStr = $"Data Source={connSource};Initial Catalog={connCatalog};Integrated Security=True";
                             using (SqlConnection connection = new SqlConnection(connStr))
                             {
+                                connection.Open();
                                 SqlDataAdapter adapter = new SqlDataAdapter();
                                 //SqlDataAdapter adapter2 = new SqlDataAdapter();
                                 adapter.SelectCommand = new SqlCommand("SELECT * FROM dbo.med_stuf", connection);
@@ -259,6 +262,7 @@ namespace DBUpdateWF
                                                     }
                                                     if (!newDataRow["action"].Equals(DBNull.Value))
                                                     {
+                                                        delCodeCounter++;
                                                         changesTable.Rows.Add(new Object[] { DBNull.Value,
                                                                                 newDataRow["code"],
                                                                                 dbRow["cost"],
@@ -281,6 +285,7 @@ namespace DBUpdateWF
                                                 {
                                                     if (!newDataRow["action"].Equals(DBNull.Value))
                                                     {
+                                                        delCodeCounter++;
                                                         changesTable.Rows.Add(new Object[] { DBNull.Value,
                                                                                 newDataRow["code"],
                                                                                 dbRow["cost"],
@@ -341,6 +346,9 @@ namespace DBUpdateWF
                                 #endregion
                                 if (changesTable.Rows.Count > 0)
                                 {
+                                    SqlCommand command = connection.CreateCommand();
+                                    command.CommandText = "DELETE dbo.med_stuf_temp";
+                                    command.ExecuteNonQuery();
                                     adapter.SelectCommand = new SqlCommand("SELECT * FROM dbo.med_stuf_temp", connection);
                                     SqlCommandBuilder commandBuilder = new SqlCommandBuilder(adapter);
                                     adapter.Update(changesTable);
@@ -358,7 +366,8 @@ namespace DBUpdateWF
 Из них с изменениями: {totalChangeCounter}
 Изменений цены: {changeCostCounter}
 Изменений наименования: {changeNameCounter}
-Новых записей: {newCodeCounter}", "Итого:", MessageBoxButtons.OK, MessageBoxIcon.Information);
+Новых записей: {newCodeCounter}
+Записей на удаление: {delCodeCounter}", "Итого:", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                                 }
                                 else
@@ -377,7 +386,7 @@ namespace DBUpdateWF
                     }
                     else
                     {
-                        MessageBox.Show("Проверьте наличие файла конфигурации подключкния к БД", "Ошибка подключения к БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Проверьте наличие файла конфигурации подключения к БД", "Ошибка подключения к БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         medStufButton.Enabled = true;
                     }
                 #endregion
@@ -394,6 +403,7 @@ namespace DBUpdateWF
                 }
             }//else от наличия файла в openFileDialogе
             updateButton.Enabled = true;
+            cansButton.Enabled = true;
         }//medStufButton
 
         //private void Form1_Load(object sender, EventArgs e)
@@ -431,28 +441,69 @@ namespace DBUpdateWF
                         // подтверждаем транзакцию
                         transaction.Commit();
                         MessageBox.Show("Данные обновлены");
+                        medStufButton.Enabled = true;
+                        updateButton.Enabled = false;
+                        cansButton.Enabled = false;
+                        gridControl2.Visible = false;
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show($@"При обновлении БД возникла ошибка
 {ex.Message}","Ошибка обновления", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         transaction.Rollback();
-                        command.CommandText = "DELETE dbo.med_stuf_temp";
-                        command.ExecuteNonQuery();
+                        medStufButton.Enabled = false;
+                        updateButton.Enabled = true;
+                        cansButton.Enabled = true;
+                        gridControl2.Visible = true;
+
                     }
                 }
             }
             else
             {
-                MessageBox.Show("Проверьте наличие файла конфигурации подключкния к БД", "Ошибка подключения к БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Проверьте наличие файла конфигурации подключения к БД", "Ошибка подключения к БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 medStufButton.Enabled = true;
             }
+        }
 
-
-
-            medStufButton.Enabled = true;
-            updateButton.Enabled = false;
-            gridControl2.Visible = false;
+        private void cansButton_Click(object sender, EventArgs e)
+        {
+            if (ini.KeyExists("Source", "DB_Connection") && ini.KeyExists("Catalog", "DB_Connection"))
+            {
+                connSource = ini.ReadINI("DB_Connection", "Source");
+                connCatalog = ini.ReadINI("DB_Connection", "Catalog");
+                try
+                {
+                    string connStr = $"Data Source={connSource};Initial Catalog={connCatalog};Integrated Security=True";
+                    using (SqlConnection connection = new SqlConnection(connStr))
+                    {
+                        connection.Open();
+                        SqlCommand command = connection.CreateCommand();
+                        command.CommandText = "DELETE dbo.med_stuf_temp";
+                        command.ExecuteNonQuery();
+                        medStufButton.Enabled = true;
+                        updateButton.Enabled = false;
+                        cansButton.Enabled = false;
+                        gridControl2.Visible = false;
+                    }
+                }
+                catch (SqlException sqlEx)
+                {
+                    MessageBox.Show($"Проверьте параметры подключения к базе данных {sqlEx.Message}");
+                    medStufButton.Enabled = false;
+                    updateButton.Enabled = true;
+                    cansButton.Enabled = true;
+                    gridControl2.Visible = true;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Проверьте наличие файла конфигурации подключения к БД", "Ошибка подключения к БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                medStufButton.Enabled = false;
+                updateButton.Enabled = true;
+                cansButton.Enabled = true;
+                gridControl2.Visible = true;
+            }
         }
     }
 }
